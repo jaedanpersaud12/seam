@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seam — compare files and folders</title>
+<meta name="description" content="Seam is a fast, free and open source diff tool for macOS and Windows. Side-by-side file and folder comparison, patience diffs, and a git difftool.">
+<meta property="og:title" content="Seam — compare files and folders">
+<meta property="og:description" content="A fast, quiet diff tool for macOS and Windows. Free and open source.">
+<meta property="og:image" content="https://seam-diff.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1013; --surface: #15181c; --raised: #1b1e23; --line: #262a31; --line-2: #31363e;
+    --ink: #e8eaed; --ink-2: #a7adb6; --ink-3: #6b727d;
+    --accent: #8f87ff; --accent-2: #6d5ef8;
+    --add: #3ccf7f; --del: #ff6b6b; --mod: #f5b342;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f4f5f7; --surface: #ffffff; --raised: #ffffff; --line: #e0e3e7; --line-2: #d2d6dc;
+      --ink: #14171b; --ink-2: #4f5762; --ink-3: #8a919b;
+      --accent: #5b4ff5; --accent-2: #4a3ee6;
+      --add: #1f9d55; --del: #d93a3a; --mod: #c98a0c;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 Inter, ui-sans-serif, -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01";
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* nav */
+  nav { display: flex; align-items: center; gap: 12px; height: 64px; }
+  nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
+  nav .brand img { width: 26px; height: 26px; }
+  nav .spacer { flex: 1; }
+  nav a.link { color: var(--ink-2); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; transition: color .15s, background-color .15s; }
+  nav a.link:hover { color: var(--ink); background: color-mix(in oklab, var(--ink) 7%, transparent); }
+
+  /* hero */
+  .hero { padding: 72px 0 40px; text-align: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 6px; background: var(--surface); }
+  .eyebrow b { font-weight: 500; color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); padding: 1px 8px; border-radius: 999px; }
+  h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 650; margin: 22px auto 0; max-width: 14ch; text-wrap: balance; }
+  h1 .seam { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font-size: 18px; color: var(--ink-2); max-width: 54ch; margin: 18px auto 0; text-wrap: pretty; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 32px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px; border-radius: 9px;
+    font: 500 14.5px/1 Inter, sans-serif; text-decoration: none; cursor: pointer; border: 0;
+    transition: transform .2s cubic-bezier(.23,1,.32,1), background-color .15s, box-shadow .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { flex: none; }
+  .btn.primary { background: var(--accent); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / .2) inset, 0 8px 24px -10px color-mix(in oklab, var(--accent) 80%, transparent); }
+  .btn.primary:hover { background: var(--accent-2); }
+  .btn.secondary { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line-2) inset; }
+  .btn.secondary:hover { background: var(--raised); box-shadow: 0 0 0 1px var(--ink-3) inset; }
+  .btn small { font-size: 12px; color: color-mix(in oklab, currentColor 70%, transparent); font-weight: 400; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .meta { margin-top: 14px; font-size: 13px; color: var(--ink-3); }
+  .meta a { color: var(--ink-2); }
+
+  /* app mock */
+  .stage { margin: 56px auto 0; max-width: 1060px; position: relative; }
+  .stage::before {
+    content: ""; position: absolute; inset: -60px -40px auto; height: 320px; z-index: -1;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--accent) 30%, transparent), transparent);
+    filter: blur(20px); opacity: .55;
+  }
+  .window {
+    border-radius: 12px; overflow: hidden; background: var(--surface); text-align: left;
+    box-shadow: 0 0 0 1px var(--line-2), 0 40px 80px -30px rgb(0 0 0 / .55), 0 12px 24px -12px rgb(0 0 0 / .3);
+  }
+  .titlebar { height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 14px; background: var(--raised); border-bottom: 1px solid var(--line); }
+  .lights { display: flex; gap: 7px; margin-right: 14px; }
+  .lights i { width: 11px; height: 11px; border-radius: 50%; display: block; background: #ff5f57; }
+  .lights i:nth-child(2) { background: #febc2e; } .lights i:nth-child(3) { background: #28c840; }
+  .tab { font-size: 12px; padding: 5px 12px; border-radius: 6px; color: var(--ink-3); }
+  .tab.on { color: var(--ink); background: var(--surface); box-shadow: 0 0 0 1px var(--line-2); font-weight: 500; }
+  .heads { display: grid; grid-template-columns: 1fr 52px 1fr; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .heads div { padding: 8px 14px; display: flex; gap: 8px; align-items: baseline; }
+  .heads div span { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+  .heads .gap { border-inline: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 60%, var(--surface)); padding: 0; }
+  .panes { display: grid; grid-template-columns: 1fr 52px 1fr; font: 12px/22px var(--mono); position: relative; }
+  .pane { padding: 6px 0; overflow: hidden; }
+  .ln > span { white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+  .ln { display: grid; grid-template-columns: 38px 1fr; height: 22px; }
+  .ln i { color: var(--ink-3); font-style: normal; text-align: right; padding-right: 12px; font-size: 10.5px; }
+  .ln.del { background: color-mix(in oklab, var(--del) 10%, transparent); box-shadow: 3px 0 0 var(--del) inset; }
+  .ln.add { background: color-mix(in oklab, var(--add) 10%, transparent); box-shadow: 3px 0 0 var(--add) inset; }
+  .ln.mod { background: color-mix(in oklab, var(--mod) 10%, transparent); box-shadow: 3px 0 0 var(--mod) inset; }
+  .ln u { text-decoration: none; background: color-mix(in oklab, var(--mod) 32%, transparent); border-radius: 2px; }
+  .k { color: var(--accent); } .s { color: color-mix(in oklab, var(--add) 75%, var(--ink)); } .c { color: var(--ink-3); font-style: italic; }
+  .seamcol { border-inline: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 60%, var(--surface)); position: relative; }
+  .seamcol svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .status { display: flex; gap: 14px; padding: 6px 14px; border-top: 1px solid var(--line); font: 11px var(--mono); color: var(--ink-3); }
+  .status .a { color: var(--add); } .status .d { color: var(--del); } .status .m { color: var(--mod); }
+
+  /* features */
+  section { padding: 96px 0 0; }
+  h2 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.035em; line-height: 1.1; margin: 0; font-weight: 650; text-wrap: balance; }
+  .sub { color: var(--ink-2); max-width: 56ch; margin: 12px 0 0; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-top: 36px; }
+  .card { background: var(--surface); padding: 24px; }
+  .card h3 { font-size: 15px; margin: 14px 0 6px; letter-spacing: -0.01em; font-weight: 600; }
+  .card p { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .glyph { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: color-mix(in oklab, var(--accent) 13%, transparent); color: var(--accent); }
+
+  /* terminal */
+  .split { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; }
+  .term { background: #0b0d10; color: #d6d9de; border-radius: 12px; box-shadow: 0 0 0 1px #262a31; font: 13px/1.8 var(--mono); padding: 18px 20px; overflow-x: auto; }
+  .term .p { color: #6b727d; user-select: none; } .term .cm { color: #6b727d; }
+  .term .hl { color: #b3a8ff; }
+
+  /* download */
+  .dl { margin-top: 96px; padding: 56px 32px; border-radius: 16px; text-align: center; background: var(--surface); box-shadow: 0 0 0 1px var(--line); position: relative; overflow: hidden; }
+  .dl img { width: 88px; height: 88px; }
+  .dl h2 { margin-top: 12px; }
+  .note { font-size: 13px; color: var(--ink-3); max-width: 60ch; margin: 18px auto 0; }
+
+  footer { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; padding: 48px 0 56px; font-size: 13px; color: var(--ink-3); }
+  footer a { color: var(--ink-2); text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; }
+    .panes, .heads { grid-template-columns: 1fr 28px 1fr; }
+    .pane .ln { grid-template-columns: 26px 1fr; }
+    .titlebar .tab:not(.on) { display: none; }
+    nav a.link.hide-sm { display: none; }
+    .stage { margin-inline: -8px; }
+  }
+  @media (max-width: 560px) {
+    .panes { font-size: 10px; }
+    .heads div span { display: none; }
+  }
+  /* ?shot renders just the app illustration, for README and social images. */
+  body.shot nav, body.shot .hero > :not(.stage), body.shot section, body.shot .dl, body.shot footer { display: none; }
+  body.shot .hero { padding: 40px 0; }
+  body.shot .stage { margin-top: 0; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="/"><img src="/icon.png" alt="">Seam</a>
+    <span class="spacer"></span>
+    <a class="link hide-sm" href="#features">Features</a>
+    <a class="link hide-sm" href="#terminal">Git difftool</a>
+    <a class="link" href="https://github.com/jaedanpersaud12/seam" aria-label="Seam on GitHub">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow"><b>Free</b> Open source · macOS &amp; Windows</span>
+    <h1>See exactly what <span class="seam">changed</span>.</h1>
+    <p class="lede">Seam is a fast, quiet diff tool for files and folders. Side by side, down to the character, with a Rust engine and an interface that stays out of your way.</p>
+    <div class="cta" data-downloads>
+      <a class="btn primary" data-os="mac" href="https://github.com/jaedanpersaud12/seam/releases/latest">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11.2 8.5c0-1.6 1.3-2.4 1.4-2.4-.8-1.1-2-1.3-2.4-1.3-1-.1-2 .6-2.5.6s-1.3-.6-2.2-.6C4.4 4.8 3.3 5.5 2.7 6.6c-1.2 2.1-.3 5.2.9 6.9.6.8 1.2 1.7 2.1 1.7.8 0 1.2-.5 2.2-.5s1.3.5 2.2.5 1.5-.8 2-1.7c.6-.9.9-1.8.9-1.9 0 0-1.8-.7-1.8-2.8zM9.6 3.6c.4-.5.8-1.3.7-2-.7 0-1.5.5-1.9 1-.4.5-.8 1.2-.7 2 .7 0 1.4-.4 1.9-1z"/></svg>
+        Download for macOS <small>Universal</small>
+      </a>
+      <a class="btn secondary" data-os="win" href="https://github.com/jaedanpersaud12/seam/releases/latest">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.3 6.5 1.4v6.2H0zM7.3 1.3 16 0v7.6H7.3zM0 8.4h6.5v6.2L0 13.7zM7.3 8.4H16V16l-8.7-1.2z"/></svg>
+        Download for Windows <small>x64</small>
+      </a>
+    </div>
+    <p class="meta"><span data-version>Latest release</span> · <a href="https://github.com/jaedanpersaud12/seam">View source on GitHub</a></p>
+
+    <div class="stage" aria-label="Seam comparing two versions of a file">
+      <div class="window" role="img" aria-label="Screenshot-style illustration of the Seam window showing a side-by-side diff">
+        <div class="titlebar">
+          <div class="lights"><i></i><i></i><i></i></div>
+          <span class="tab on">server.ts ↔ server.ts</span>
+          <span class="tab">src ↔ src</span>
+        </div>
+        <div class="heads">
+          <div><b>server.ts</b><span>~/app/v1/src</span></div>
+          <div class="gap"></div>
+          <div><b>server.ts</b><span>~/app/v2/src</span></div>
+        </div>
+        <div class="panes" id="panes">
+          <div class="pane">
+<div class="ln"><i>1</i><span><span class="k">import</span> { createServer } <span class="k">from</span> <span class="s">"node:http"</span>;</span></div>
+<div class="ln"><i>2</i><span><span class="k">import</span> { readConfig } <span class="k">from</span> <span class="s">"./config"</span>;</span></div>
+<div class="ln"><i>3</i><span></span></div>
+<div class="ln mod"><i>4</i><span><span class="k">const</span> PORT = <u>3000</u>;</span></div>
+<div class="ln"><i>5</i><span></span></div>
+<div class="ln"><i>6</i><span><span class="k">export function</span> start() {</span></div>
+<div class="ln"><i>7</i><span>  <span class="k">const</span> server = createServer(handle);</span></div>
+<div class="ln mod"><i>8</i><span>  server.listen(PORT, () =&gt; <u>console.log</u>(<span class="s">`up`</span>));</span></div>
+<div class="ln"><i>9</i><span>  <span class="k">return</span> server;</span></div>
+<div class="ln"><i>10</i><span>}</span></div>
+<div class="ln"><i>11</i><span></span></div>
+<div class="ln del"><i>12</i><span><span class="k">function</span> shutdown(server) {</span></div>
+<div class="ln del"><i>13</i><span>  server.close();</span></div>
+<div class="ln del"><i>14</i><span>}</span></div>
+<div class="ln"><i>15</i><span></span></div>
+<div class="ln mod"><i>16</i><span><span class="k">export function</span> <u>color</u>(name) {</span></div>
+<div class="ln"><i>17</i><span>  <span class="k">return</span> name.toLowerCase();</span></div>
+<div class="ln"><i>18</i><span>}</span></div>
+          </div>
+          <div class="seamcol"><svg id="ribbons" preserveAspectRatio="none"></svg></div>
+          <div class="pane">
+<div class="ln"><i>1</i><span><span class="k">import</span> { createServer } <span class="k">from</span> <span class="s">"node:http"</span>;</span></div>
+<div class="ln"><i>2</i><span><span class="k">import</span> { readConfig } <span class="k">from</span> <span class="s">"./config"</span>;</span></div>
+<div class="ln add"><i>3</i><span><span class="k">import</span> { log } <span class="k">from</span> <span class="s">"./log"</span>;</span></div>
+<div class="ln"><i>4</i><span></span></div>
+<div class="ln mod"><i>5</i><span><span class="k">const</span> PORT = <u>Number(process.env.PORT ?? 3000)</u>;</span></div>
+<div class="ln"><i>6</i><span></span></div>
+<div class="ln"><i>7</i><span><span class="k">export function</span> start() {</span></div>
+<div class="ln"><i>8</i><span>  <span class="k">const</span> server = createServer(handle);</span></div>
+<div class="ln mod"><i>9</i><span>  server.listen(PORT, () =&gt; <u>log.info</u>(<span class="s">`up`</span>));</span></div>
+<div class="ln"><i>10</i><span>  <span class="k">return</span> server;</span></div>
+<div class="ln"><i>11</i><span>}</span></div>
+<div class="ln"><i>12</i><span></span></div>
+<div class="ln mod"><i>13</i><span><span class="k">export function</span> <u>colour</u>(name) {</span></div>
+<div class="ln"><i>14</i><span>  <span class="k">return</span> name.toLowerCase();</span></div>
+<div class="ln"><i>15</i><span>}</span></div>
+<div class="ln"><i>16</i><span><span class="c">// graceful shutdown lives in ./lifecycle</span></span></div>
+<div class="ln"><i>17</i><span></span></div>
+<div class="ln"><i>18</i><span></span></div>
+          </div>
+        </div>
+        <div class="status"><span class="a">+1</span><span class="d">−3</span><span class="m">~3</span><span>5 changes</span><span style="flex:1"></span><span>Patience · Exact whitespace</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features">
+    <h2>Everything a diff tool should do, nothing it shouldn't.</h2>
+    <p class="sub">It works the way classic visual diff tools do, with a modern look and an engine that keeps up with big files and bigger folders.</p>
+    <div class="grid">
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2" width="5" height="12" rx="1.2"/><rect x="9.5" y="2" width="5" height="12" rx="1.2"/></svg></div><h3>Side by side, to the character</h3><p>Changed lines are tinted and the exact words and characters that changed are highlighted. Ribbons show where every change lands.</p></div>
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><h3>Patience diff by default</h3><p>Moved functions and closing braces line up the way a person would expect. Switch to Myers or Histogram with one click.</p></div>
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4.5c0-.6.4-1 1-1h3l1.3 1.4H13c.6 0 1 .4 1 1V12c0 .6-.4 1-1 1H3c-.6 0-1-.4-1-1z"/></svg></div><h3>Whole folders</h3><p>Walks both trees in parallel and hashes with BLAKE3. Files are marked identical, different, one-sided, or equivalent under your rules.</p></div>
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h8m-3-3 3 3-3 3"/></svg></div><h3>Edit and merge across</h3><p>Both panes are editors. Copy a change to the other side with an arrow or <code>⌘]</code>, then save each side with its original encoding.</p></div>
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 5h11M2.5 8h7M2.5 11h4"/><circle cx="12" cy="11" r="1.5"/></svg></div><h3>Ignore what doesn't matter</h3><p>Trailing whitespace, amounts of whitespace, all whitespace, case and line endings. Folder results follow the same rules.</p></div>
+      <div class="card"><div class="glyph"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="2.5" width="9" height="11.5" rx="1.5"/><path d="M6 2.5v-.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5v.5"/></svg></div><h3>Paste to compare</h3><p>No files? Open a text comparison and paste two snippets. Handy for configs, logs and API responses.</p></div>
+    </div>
+  </section>
+
+  <section id="terminal" class="split">
+    <div>
+      <h2>Lives in your terminal, too.</h2>
+      <p class="sub">Install the <code>seam</code> command from the app menu. Seam offers to register itself as git's difftool; <code>--wait</code> keeps git paused until you close the comparison.</p>
+    </div>
+    <pre class="term"><span class="p">$ </span>seam old.json new.json
+<span class="p">$ </span>seam ./v1 ./v2 <span class="cm"># folders work too</span>
+<span class="p">$ </span>git config --global diff.tool seam
+<span class="p">$ </span>git difftool <span class="hl">HEAD~1</span></pre>
+  </section>
+
+  <div class="dl">
+    <img src="/icon.png" alt="">
+    <h2>Get Seam</h2>
+    <p class="sub" style="margin-inline:auto">Free, MIT licensed, no account, no telemetry.</p>
+    <div class="cta" data-downloads>
+      <a class="btn primary" data-os="mac" href="https://github.com/jaedanpersaud12/seam/releases/latest">Download for macOS <small>.dmg</small></a>
+      <a class="btn secondary" data-os="win" href="https://github.com/jaedanpersaud12/seam/releases/latest">Download for Windows <small>.exe</small></a>
+    </div>
+    <p class="note">These builds aren't signed yet. On macOS, right-click Seam and choose <b>Open</b> the first time. On Windows, choose <b>More info → Run anyway</b> if SmartScreen appears.</p>
+  </div>
+
+  <footer>
+    <span>Seam · MIT License · Not affiliated with SourceGear or DiffMerge.</span>
+    <span><a href="https://github.com/jaedanpersaud12/seam">GitHub</a> · <a href="https://github.com/jaedanpersaud12/seam/releases">Releases</a> · <a href="https://github.com/jaedanpersaud12/seam/issues">Report an issue</a></span>
+  </footer>
+</div>
+
+<script>
+  if (/[?&]shot\b/.test(location.search)) document.body.classList.add("shot");
+  if (/[?&]dark\b/.test(location.search)) document.documentElement.dataset.theme = "dark";
+</script>
+<script>
+  // Point download buttons at the newest release assets, and lead with the visitor's OS.
+  (function () {
+    var isWin = /Windows/.test(navigator.userAgent);
+    if (isWin) {
+      document.querySelectorAll("[data-downloads]").forEach(function (row) {
+        var mac = row.querySelector('[data-os="mac"]'), win = row.querySelector('[data-os="win"]');
+        mac.classList.replace("primary", "secondary");
+        win.classList.replace("secondary", "primary");
+        row.insertBefore(win, mac);
+      });
+    }
+    fetch("https://api.github.com/repos/jaedanpersaud12/seam/releases/latest")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rel) {
+        if (!rel) return;
+        var find = function (re) { var a = (rel.assets || []).find(function (x) { return re.test(x.name); }); return a && a.browser_download_url; };
+        var mac = find(/universal\.dmg$/) || find(/\.dmg$/);
+        var win = find(/x64-setup\.exe$/) || find(/\.msi$/);
+        document.querySelectorAll('[data-os="mac"]').forEach(function (a) { if (mac) a.href = mac; });
+        document.querySelectorAll('[data-os="win"]').forEach(function (a) { if (win) a.href = win; });
+        var v = document.querySelector("[data-version]");
+        if (v && rel.tag_name) v.textContent = "Version " + rel.tag_name.replace(/^v/, "");
+      })
+      .catch(function () {});
+  })();
+
+  // Draw the connector ribbons between matching changes in the illustration.
+  (function () {
+    var svg = document.getElementById("ribbons"), panes = document.getElementById("panes");
+    var pairs = [[[3, 4], [4, 5], "mod"], [[7, 8], [8, 9], "mod"], [[11, 14], [11, 11], "del"], [[15, 16], [12, 13], "mod"], [[2, 2], [2, 3], "add"]];
+    function draw() {
+      var lnH = panes.querySelector(".ln").getBoundingClientRect().height, top = 6;
+      var w = svg.getBoundingClientRect().width;
+      svg.setAttribute("viewBox", "0 0 " + w + " " + panes.getBoundingClientRect().height);
+      svg.innerHTML = pairs.map(function (p) {
+        var l0 = top + p[0][0] * lnH, l1 = top + p[0][1] * lnH, r0 = top + p[1][0] * lnH, r1 = top + p[1][1] * lnH, c = w / 2;
+        if (l1 - l0 < 2) { l0 -= 1; l1 += 1; } if (r1 - r0 < 2) { r0 -= 1; r1 += 1; }
+        var col = "var(--" + p[2] + ")";
+        return '<path d="M0 ' + l0 + " C" + c + " " + l0 + " " + c + " " + r0 + " " + w + " " + r0 + " L" + w + " " + r1 + " C" + c + " " + r1 + " " + c + " " + l1 + " 0 " + l1 + ' Z" fill="' + col + '" fill-opacity=".14" stroke="' + col + '" stroke-opacity=".5" vector-effect="non-scaling-stroke"/>';
+      }).join("");
+    }
+    draw();
+    addEventListener("resize", draw);
+    document.fonts && document.fonts.ready.then(draw);
+  })();
+</script>
+</body>
+</html>

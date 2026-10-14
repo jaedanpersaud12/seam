@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#262a31"/>
+      <stop offset="1" stop-color="#121418"/>
+    </linearGradient>
+    <linearGradient id="seam" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a89fff"/>
+      <stop offset="1" stop-color="#6d5ef8"/>
+    </linearGradient>
+  </defs>
+  <!-- macOS icon grid: 824px squircle centred in 1024 -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <rect x="100.5" y="100.5" width="823" height="823" rx="184.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
+  <!-- left pane -->
+  <rect x="228" y="250" width="200" height="524" rx="36" fill="#e4e6e9" fill-opacity="0.1"/>
+  <rect x="268" y="306" width="120" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.35"/>
+  <rect x="268" y="356" width="88" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.25"/>
+  <rect x="252" y="420" width="152" height="96" rx="14" fill="#ff6b6b" fill-opacity="0.28"/>
+  <rect x="268" y="560" width="104" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.25"/>
+  <rect x="268" y="610" width="128" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.35"/>
+  <!-- right pane -->
+  <rect x="596" y="250" width="200" height="524" rx="36" fill="#e4e6e9" fill-opacity="0.1"/>
+  <rect x="636" y="306" width="120" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.35"/>
+  <rect x="636" y="356" width="88" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.25"/>
+  <rect x="620" y="490" width="152" height="150" rx="14" fill="#3ccf7f" fill-opacity="0.28"/>
+  <rect x="636" y="680" width="104" height="22" rx="11" fill="#e4e6e9" fill-opacity="0.25"/>
+  <!-- the seam: a ribbon joining the two changes -->
+  <path d="M404 420 C512 420 512 490 620 490 L620 640 C512 640 512 516 404 516 Z" fill="url(#seam)"/>
+</svg>

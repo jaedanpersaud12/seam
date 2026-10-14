@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+/* Theme follows data-theme on <html>; JS resolves "system" to light or dark. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ── Instrument: graphite neutrals, one violet accent, hairlines over shadows ── */
+:root {
+  color-scheme: light;
+  --ink-50: #f7f8f9;
+  --ink-100: #eef0f2;
+  --ink-200: #e0e3e7;
+  --ink-300: #c8cdd3;
+  --ink-400: #9aa1ab;
+  --ink-500: #6c7480;
+  --ink-600: #515965;
+  --ink-700: #383f49;
+  --ink-800: #22272e;
+  --ink-900: #14171b;
+  --ink-950: #0b0d10;
+
+  --canvas: #f2f3f5;
+  --surface: #ffffff;
+  --chrome: rgb(244 245 247 / 0.72);
+  --scrim: rgb(20 23 27 / 0.32);
+  --accent: #5b4ff5;
+  --on-accent: #ffffff;
+  --ok: #1f9d55;
+  --bad: #d93a3a;
+
+  --sh-control: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(20 23 27 / 0.08), 0 1px 2px rgb(20 23 27 / 0.06);
+  --sh-control-focus: 0 0 0 1px var(--accent), 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+  --sh-card: 0 0 0 1px rgb(20 23 27 / 0.02), 0 1px 2px rgb(20 23 27 / 0.04);
+  --sh-pop: 0 0 0 1px rgb(20 23 27 / 0.06), 0 12px 32px -12px rgb(20 23 27 / 0.28), 0 2px 6px -2px rgb(20 23 27 / 0.08);
+  --sh-thumb: 0 0 0 1px rgb(20 23 27 / 0.06), 0 1px 2px rgb(20 23 27 / 0.16);
+  --sh-well: inset 0 1px 1px rgb(20 23 27 / 0.05);
+  --sh-bar: inset 0 1px 0 rgb(255 255 255 / 0.3);
+
+  /* Diff colours: line tint, character highlight, gutter bar. */
+  --add-bg: rgb(31 157 85 / 0.09);
+  --add-hi: rgb(31 157 85 / 0.26);
+  --add-bar: #23a35b;
+  --del-bg: rgb(217 58 58 / 0.08);
+  --del-hi: rgb(217 58 58 / 0.24);
+  --del-bar: #d94040;
+  --mod-bg: rgb(212 140 20 / 0.09);
+  --mod-hi: rgb(212 140 20 / 0.3);
+  --mod-bar: #d4920f;
+  --ribbon-opacity: 0.55;
+
+  --syn-keyword: #6a4fd8;
+  --syn-string: #2f7d5b;
+  --syn-number: #b0582a;
+  --syn-comment: #8b929c;
+  --syn-fn: #2d5fb8;
+  --syn-type: #9a4f9c;
+  --syn-prop: #45607a;
+
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --code-size: 12.5px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* The ink scale inverts, so "ink-800 on ink-100" means high contrast in both themes. */
+  --ink-50: #0e1013;
+  --ink-100: #16191d;
+  --ink-200: #262a31;
+  --ink-300: #363b44;
+  --ink-400: #5a616c;
+  --ink-500: #8a919b;
+  --ink-600: #a7adb6;
+  --ink-700: #c8ccd2;
+  --ink-800: #e4e6e9;
+  --ink-900: #f1f2f4;
+  --ink-950: #fafafa;
+
+  --canvas: #0f1114;
+  --surface: #17191d;
+  --chrome: rgb(18 20 24 / 0.6);
+  --scrim: rgb(0 0 0 / 0.55);
+  --accent: #8f87ff;
+  --on-accent: #0e0c24;
+  --ok: #3ccf7f;
+  --bad: #ff6b6b;
+
+  --sh-control: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 0 0 1px rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.4);
+  --sh-card: 0 0 0 1px rgb(255 255 255 / 0.02);
+  --sh-pop: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --sh-thumb: 0 0 0 1px rgb(255 255 255 / 0.1), 0 1px 2px rgb(0 0 0 / 0.5);
+  --sh-well: inset 0 1px 2px rgb(0 0 0 / 0.35);
+  --sh-bar: inset 0 1px 0 rgb(255 255 255 / 0.18);
+
+  --add-bg: rgb(60 207 127 / 0.08);
+  --add-hi: rgb(60 207 127 / 0.24);
+  --add-bar: #3ccf7f;
+  --del-bg: rgb(255 107 107 / 0.08);
+  --del-hi: rgb(255 107 107 / 0.24);
+  --del-bar: #ff6b6b;
+  --mod-bg: rgb(245 179 66 / 0.08);
+  --mod-hi: rgb(245 179 66 / 0.26);
+  --mod-bar: #f5b342;
+  --ribbon-opacity: 0.5;
+
+  --syn-keyword: #b3a8ff;
+  --syn-string: #8fd1ae;
+  --syn-number: #f0a77a;
+  --syn-comment: #6b727d;
+  --syn-fn: #8fb6f5;
+  --syn-type: #e0a7e0;
+  --syn-prop: #a9bccf;
+}
+
+/* Colour-blind safe: blue for added, orange for removed, purple for changed. */
+:root[data-palette="cb"] {
+  --add-bg: rgb(30 120 230 / 0.09);
+  --add-hi: rgb(30 120 230 / 0.26);
+  --add-bar: #1e78e6;
+  --del-bg: rgb(235 120 20 / 0.09);
+  --del-hi: rgb(235 120 20 / 0.28);
+  --del-bar: #eb7814;
+  --mod-bg: rgb(150 90 220 / 0.09);
+  --mod-hi: rgb(150 90 220 / 0.26);
+  --mod-bar: #965adc;
+}
+
+@theme inline {
+  --color-ink-50: var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-200: var(--ink-200);
+  --color-ink-300: var(--ink-300);
+  --color-ink-400: var(--ink-400);
+  --color-ink-500: var(--ink-500);
+  --color-ink-600: var(--ink-600);
+  --color-ink-700: var(--ink-700);
+  --color-ink-800: var(--ink-800);
+  --color-ink-900: var(--ink-900);
+  --color-ink-950: var(--ink-950);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-chrome: var(--chrome);
+  --color-scrim: var(--scrim);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-ok: var(--ok);
+  --color-bad: var(--bad);
+  --color-add: var(--add-bar);
+  --color-del: var(--del-bar);
+  --color-mod: var(--mod-bar);
+
+  --shadow-control: var(--sh-control);
+  --shadow-control-focus: var(--sh-control-focus);
+  --shadow-card: var(--sh-card);
+  --shadow-pop: var(--sh-pop);
+  --shadow-thumb: var(--sh-thumb);
+  --shadow-well: var(--sh-well);
+  --shadow-bar: var(--sh-bar);
+
+  --font-sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--mono);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* Transparent so the macOS vibrancy shows through the chrome. */
+  background: transparent;
+  color: var(--ink-800);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+
+/* Without the native window effect (browser preview), keep the chrome solid. */
+:root:not(.vibrant) body {
+  background: var(--canvas);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 28%, transparent);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── CodeMirror ── */
+.cm-editor {
+  height: 100%;
+  background: var(--surface);
+  color: var(--ink-800);
+  font-size: var(--code-size);
+}
+.cm-editor.cm-focused {
+  outline: none;
+}
+.cm-scroller {
+  font-family: var(--mono) !important;
+  line-height: 1.6 !important;
+  user-select: text;
+}
+.cm-content {
+  caret-color: var(--accent);
+  padding: 6px 0 !important;
+}
+.cm-cursor {
+  border-left: 2px solid var(--accent) !important;
+}
+.cm-selectionBackground,
+.cm-focused .cm-selectionBackground {
+  background: color-mix(in oklab, var(--accent) 22%, transparent) !important;
+}
+.cm-placeholder {
+  color: var(--ink-400);
+  font-style: italic;
+}
+.cm-activeLine {
+  background: color-mix(in oklab, var(--ink-200) 35%, transparent);
+}
+.cm-gutters {
+  background: var(--surface) !important;
+  border: none !important;
+  color: var(--ink-400);
+}
+.cm-lineNumbers .cm-gutterElement {
+  padding: 0 10px 0 12px !important;
+  min-width: 36px;
+  font-size: 11px;
+}
+.cm-activeLineGutter {
+  background: transparent !important;
+  color: var(--ink-700);
+}
+.cm-panels {
+  background: var(--ink-50) !important;
+  color: var(--ink-700) !important;
+}
+.cm-panels-bottom {
+  border-top: 1px solid var(--ink-200) !important;
+}
+.cm-searchMatch {
+  background: color-mix(in oklab, var(--accent) 18%, transparent) !important;
+  outline: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
+}
+.cm-textfield,
+.cm-button {
+  background: var(--surface) !important;
+  border: 1px solid var(--ink-200) !important;
+  border-radius: 5px !important;
+  color: var(--ink-800) !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  background-image: none !important;
+}
+
+/* Diff decorations */
+.seam-line-add { background: var(--add-bg); }
+.seam-line-del { background: var(--del-bg); }
+.seam-line-mod { background: var(--mod-bg); }
+.seam-ch-add { background: var(--add-hi); border-radius: 2px; }
+.seam-ch-del { background: var(--del-hi); border-radius: 2px; }
+.seam-ch-mod { background: var(--mod-hi); border-radius: 2px; }
+.seam-line-current {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.seam-bar-gutter {
+  width: 3px;
+}
+.seam-bar-gutter .cm-gutterElement {
+  padding: 0 !important;
+}
+.seam-bar {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+}
+.seam-bar.add { background: var(--add-bar); }
+.seam-bar.del { background: var(--del-bar); }
+.seam-bar.mod { background: var(--mod-bar); }
+
+/* A hairline where the other side has lines this side doesn't. */
+.seam-gap-top { background-image: linear-gradient(var(--gap) 0 0); background-size: 100% 2px; background-repeat: no-repeat; background-position: 0 0; }
+.seam-gap-bottom { background-image: linear-gradient(var(--gap) 0 0); background-size: 100% 2px; background-repeat: no-repeat; background-position: 0 100%; }
+.seam-gap-top.add, .seam-gap-bottom.add { --gap: var(--add-bar); }
+.seam-gap-top.del, .seam-gap-bottom.del { --gap: var(--del-bar); }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}
